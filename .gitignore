@@ -1,0 +1,34 @@
+# Archivos de compilación
+/build/
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.a
+*.lib
+
+# Archivos generados por CMake
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+compile_commands.json
+
+# Ejecutables y binarios
+*.exe
+*.out
+*.app
+ayanami
+
+# Archivos de depuración
+*.log
+*.tmp
+*.swp
+*.bak
+*.core
+
+# Otros
+*.DS_Store
+.idea/
+.vscode/

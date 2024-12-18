@@ -12,7 +12,7 @@ include_directories(${Boost_INCLUDE_DIRS} include)
 
 # Archivos fuente del servidor
 set(SERVER_SOURCES
-    src/server.cpp
+    src/server/main.cpp
     src/utils/protocol.cpp
     src/utils/strings.cpp
 )

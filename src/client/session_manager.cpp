@@ -31,5 +31,5 @@ void SessionManager::wait_for_response(const std::string& id) {
         return responses_.count(id) > 0; 
     });
     responses_.erase(id);
-    condition_variables_.erase(id); // Limpia la condition_variable una vez usada
+    condition_variables_.erase(id);
 }

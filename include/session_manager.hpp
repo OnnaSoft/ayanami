@@ -17,8 +17,8 @@ public:
 private:
     std::unordered_map<std::string, std::function<void(std::string)>> sessions_;
     std::unordered_map<std::string, std::string> responses_;
+    std::unordered_map<std::string, std::condition_variable> condition_variables_;
     std::mutex mutex_;
-    std::condition_variable cv_;
 };
 
 #endif

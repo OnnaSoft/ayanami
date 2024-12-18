@@ -85,6 +85,9 @@ int main() {
                 }
             }
         }
+
+        delete env_host;
+        delete env_port;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }

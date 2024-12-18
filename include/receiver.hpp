@@ -8,7 +8,7 @@
 
 class ResponseReceiver {
 public:
-    ResponseReceiver(boost::asio::ip::tcp::socket& socket, SessionManager* manager);
+    ResponseReceiver(boost::asio::ip::tcp::socket& socket, SessionManager& manager);
     ~ResponseReceiver();
 
     void start();
@@ -18,7 +18,7 @@ private:
     void run();
 
     boost::asio::ip::tcp::socket& socket_;
-    SessionManager* manager_;
+    SessionManager& manager_;
     std::atomic<bool> stop_flag_;
     std::thread receiver_thread_;
 };

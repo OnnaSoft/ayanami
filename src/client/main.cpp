@@ -1,8 +1,3 @@
-#include "session_manager.hpp"
-#include "ping_worker.hpp"
-#include "receiver.hpp"
-#include "command_handler.hpp"
-#include "protocol.hpp"
 #include <boost/asio.hpp>
 #include <iostream>
 #include <fstream>
@@ -15,6 +10,11 @@
 #include <csignal>
 #include "strings.hpp"
 #include "history.hpp"
+#include "session_manager.hpp"
+#include "ping_worker.hpp"
+#include "receiver.hpp"
+#include "command_handler.hpp"
+#include "protocol.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -37,7 +37,7 @@ int main() {
     try {
         boost::asio::io_context io_context;
         tcp::socket socket(io_context);
-        SessionManager* session_manager = new SessionManager();
+        SessionManager session_manager{};
 
         std::string history_file = get_history_file_path();
 
@@ -48,11 +48,11 @@ int main() {
 
         load_history_from_file(history_file);
 
-        ResponseReceiver* receiver = new ResponseReceiver(socket, session_manager);
-        receiver->start();
+        ResponseReceiver receiver(socket, session_manager);
+        receiver.start();
 
-        PingWorker* ping_worker = new PingWorker(socket, io_context, session_manager);
-        ping_worker->start();
+        PingWorker ping_worker(socket, io_context, session_manager);
+        ping_worker.start();
 
         char* input;
         while (running) {
@@ -101,16 +101,12 @@ int main() {
 
         std::cout << "Deteniendo hilos..." << std::endl;
 
-        receiver->stop();
-        ping_worker->stop();
+        receiver.stop();
+        ping_worker.stop();
 
         std::cout << "Hilos detenidos." << std::endl;
         socket.close();
         std::cout << "Desconectando del servidor." << std::endl;
-
-        delete session_manager;
-        delete(ping_worker);
-        delete(receiver);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }

@@ -5,6 +5,6 @@
 #include <boost/asio.hpp>
 #include <string>
 
-void send_command(const std::string& command, boost::asio::ip::tcp::socket& socket, SessionManager* manager);
+void send_command(const std::string& command, boost::asio::ip::tcp::socket& socket, SessionManager& manager);
 
 #endif

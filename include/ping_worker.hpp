@@ -8,7 +8,7 @@
 
 class PingWorker {
 public:
-    PingWorker(boost::asio::ip::tcp::socket& socket, boost::asio::io_context& io_context, SessionManager* manager);
+    PingWorker(boost::asio::ip::tcp::socket& socket, boost::asio::io_context& io_context, SessionManager& manager);
     ~PingWorker();
 
     void start();
@@ -19,7 +19,7 @@ private:
 
     boost::asio::ip::tcp::socket& socket_;
     boost::asio::io_context& io_context_;
-    SessionManager* manager_;
+    SessionManager& manager_;
     std::atomic<bool> stop_flag_;
     std::thread worker_thread_;
 };

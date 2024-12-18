@@ -5,7 +5,7 @@
 #include <boost/asio/write.hpp>
 #include "protocol.hpp"
 
-PingWorker::PingWorker(boost::asio::ip::tcp::socket& socket, boost::asio::io_context& io_context, SessionManager* manager)
+PingWorker::PingWorker(boost::asio::ip::tcp::socket& socket, boost::asio::io_context& io_context, SessionManager& manager)
     : socket_(socket), io_context_(io_context), manager_(manager), stop_flag_(false) {}
 
 PingWorker::~PingWorker() {
@@ -30,7 +30,7 @@ void PingWorker::run() {
             std::this_thread::sleep_for(std::chrono::seconds(30));
             std::string id = "PING" + std::to_string(ping_counter++);
 
-            manager_->register_session(id, [](const std::string& response) {
+            manager_.register_session(id, [](const std::string& response) {
                 if (response == "PONG") {
                     std::cout << "PING exitoso." << std::endl;
                 }

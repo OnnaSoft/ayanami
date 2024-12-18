@@ -56,9 +56,9 @@ std::pair<std::string, std::string> read_message(tcp::socket& socket) {
     char delimiter;
     boost::asio::read(socket, boost::asio::buffer(&delimiter, 1), error);
     if (error) throw boost::system::system_error(error);
-    if (delimiter != ':') throw std::runtime_error("Formato incorrecto: Falta el delimitador ':'");
+    if (delimiter != ':') throw std::runtime_error("Invalid message format");
 
-    uint32_t content_length = message_length - FIXED_ID_SIZE - 1; // Restar ID (8 bytes) y ':'
+    uint32_t content_length = message_length - FIXED_ID_SIZE - 1;
     std::vector<char> content_buffer(content_length);
     boost::asio::read(socket, boost::asio::buffer(content_buffer), error);
     if (error) throw boost::system::system_error(error);
@@ -72,12 +72,12 @@ int main() {
         boost::asio::io_context io_context;
 
         tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8080));
-        std::cout << "Servidor escuchando en el puerto 8080..." << std::endl;
+        std::cout << "Server listening on port 8080" << std::endl;
 
         for (;;) {
             tcp::socket socket(io_context);
             acceptor.accept(socket);
-            std::cout << "Nueva conexión aceptada." << std::endl;
+            std::cout << "New connection from " << socket.remote_endpoint() << std::endl;
 
             try {
                 while (true) {
@@ -88,11 +88,9 @@ int main() {
                     auto message = build_message(fixed_id, response_content);
 
                     boost::asio::write(socket, boost::asio::buffer(message));
-
-                    std::cout << "Respuesta enviada: " << response_content << std::endl;
                 }
             } catch (const std::exception& e) {
-                std::cerr << "Conexión cerrada: " << e.what() << std::endl;
+                std::cerr << "Error: " << e.what() << std::endl;
             }
         }
     } catch (const std::exception& e) {

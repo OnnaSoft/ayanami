@@ -29,7 +29,9 @@ std::pair<std::string, std::string> read_message(tcp::socket& socket) {
     boost::system::error_code error;
     char length_buffer[4];
     boost::asio::read(socket, boost::asio::buffer(length_buffer, 4), error);
-    if (error) throw boost::system::system_error(error);
+    if (error) {
+        throw boost::system::system_error(error);
+    }
 
     uint32_t message_length = ntohl(*reinterpret_cast<uint32_t*>(length_buffer));
     char id_buffer[FIXED_ID_SIZE];
@@ -66,16 +68,21 @@ int main() {
             acceptor.accept(socket);
             std::cout << "New connection from " << socket.remote_endpoint() << std::endl;
 
-            try {
-                while (true) {
+            while (true) {
+                try {
                     auto [id, content] = read_message(socket);
                     std::string fixed_id = format_fixed_id(id);
                     std::string response_content = process_command(fixed_id, content);
                     auto message = build_message(fixed_id, response_content);
                     boost::asio::write(socket, boost::asio::buffer(message));
+                } catch (const boost::system::system_error& e) {
+                    if (e.code() == boost::asio::error::eof) {
+                        break;
+                    } else {
+                        std::cerr << "Error inesperado: " << e.what() << std::endl;
+                    }
+                    break;
                 }
-            } catch (const std::exception& e) {
-                std::cerr << "Error: " << e.what() << std::endl;
             }
         }
     } catch (const std::exception& e) {

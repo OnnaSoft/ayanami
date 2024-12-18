@@ -3,7 +3,7 @@
 #include <iostream>
 #include "strings.hpp"
 
-void send_command(const std::string& command, boost::asio::ip::tcp::socket& socket, std::shared_ptr<SessionManager> manager) {
+void send_command(const std::string& command, boost::asio::ip::tcp::socket& socket, SessionManager* manager) {
     static int command_counter = 0;
     std::string id = "CMD" + std::to_string(command_counter++);
     auto id_clean = trim(clean_null_terminated(id));

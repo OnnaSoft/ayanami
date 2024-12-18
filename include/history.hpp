@@ -1,3 +1,5 @@
+#ifndef HISTORY_HPP
+#define HISTORY_HPP
 
 #include <iostream>
 #include <fstream>
@@ -8,3 +10,5 @@ std::string get_history_file_path();
 void load_history_from_file(const std::string& filename);
 
 void save_history_to_file(const std::string& filename);
+
+#endif

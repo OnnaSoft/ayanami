@@ -12,6 +12,7 @@
 #include <atomic>
 #include <algorithm>
 #include <cctype>
+#include <csignal>
 #include "strings.hpp"
 #include "history.hpp"
 
@@ -36,7 +37,7 @@ int main() {
     try {
         boost::asio::io_context io_context;
         tcp::socket socket(io_context);
-        auto session_manager = std::make_shared<SessionManager>();
+        SessionManager* session_manager = new SessionManager();
 
         std::string history_file = get_history_file_path();
 
@@ -47,21 +48,11 @@ int main() {
 
         load_history_from_file(history_file);
 
-        std::thread receiver_thread([&]() {
-            try {
-                receive_responses(socket, session_manager);
-            } catch (const std::exception& e) {
-                std::cerr << "Error en hilo de recepción: " << e.what() << std::endl;
-            }
-        });
+        ResponseReceiver* receiver = new ResponseReceiver(socket, session_manager);
+        receiver->start();
 
-        std::thread ping_thread([&]() {
-            try {
-                ping_worker(socket, io_context, session_manager);
-            } catch (const std::exception& e) {
-                std::cerr << "Error en hilo de PING: " << e.what() << std::endl;
-            }
-        });
+        PingWorker* ping_worker = new PingWorker(socket, io_context, session_manager);
+        ping_worker->start();
 
         char* input;
         while (running) {
@@ -98,17 +89,28 @@ int main() {
             }
         }
 
+        std::cout << "Saliendo..." << std::endl;
+
         // Guardar historial al salir
         save_history_to_file(history_file);
 
+        std::cout << "Guardando historial..." << std::endl;
+
         // Apagar hilos
         running = false;
-        if (receiver_thread.joinable()) receiver_thread.join();
-        if (ping_thread.joinable()) ping_thread.join();
 
+        std::cout << "Deteniendo hilos..." << std::endl;
+
+        receiver->stop();
+        ping_worker->stop();
+
+        std::cout << "Hilos detenidos." << std::endl;
         socket.close();
         std::cout << "Desconectando del servidor." << std::endl;
 
+        delete session_manager;
+        delete(ping_worker);
+        delete(receiver);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }

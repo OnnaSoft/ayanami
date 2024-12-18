@@ -35,7 +35,7 @@ bool ensure_connection(tcp::socket& socket, boost::asio::io_context& io_context)
 
 int main() {
     try {
-        boost::asio::io_context io_context;
+        boost::asio::io_context io_context{};
         tcp::socket socket(io_context);
         SessionManager session_manager{};
 

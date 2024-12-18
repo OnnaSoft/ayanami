@@ -1,10 +1,26 @@
 #include "protocol.hpp"
-#include <cstring>
-#include <arpa/inet.h>
-#include <stdexcept>
-#include <boost/asio.hpp>
+#include <iostream>
+#include <thread>
+#include <chrono>
 
 using boost::asio::ip::tcp;
+
+bool reconnect(tcp::socket& socket, boost::asio::io_context& io_context) {
+    constexpr int RECONNECT_ATTEMPTS = 5;
+
+    for (int attempt = 1; attempt <= RECONNECT_ATTEMPTS; ++attempt) {
+        try {
+            socket.close();  // Cerrar el socket anterior
+            socket.connect(tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 8081));
+            std::cout << "Conexión exitosa." << std::endl;
+            return true;
+        } catch (const std::exception& e) {
+            std::cerr << "Error al conectar: " << e.what() << std::endl;
+            std::this_thread::sleep_for(std::chrono::seconds(1)); // Esperar antes de reintentar
+        }
+    }
+    return false; // Si falla después de varios intentos
+}
 
 // Construir el mensaje en el formato length:id:content
 std::vector<char> build_message(const std::string& id, const std::string& content) {

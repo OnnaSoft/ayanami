@@ -14,12 +14,19 @@ include_directories(${Boost_INCLUDE_DIRS} include)
 set(SERVER_SOURCES
     src/server.cpp
     src/utils/protocol.cpp
+    src/utils/strings.cpp
 )
 
 # Archivos fuente del cliente
 set(CLIENT_SOURCES
-    src/client.cpp
+    src/client/main.cpp
+    src/client/command_handler.cpp
+    src/client/ping_worker.cpp
+    src/client/receiver.cpp
+    src/client/session_manager.cpp
+    src/client/history.cpp
     src/utils/protocol.cpp
+    src/utils/strings.cpp
 )
 
 # Ejecutable del servidor

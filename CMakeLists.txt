@@ -1,14 +1,20 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 project(AyanamiBD)
 
 # Configurar estándar C++
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_EXTENSIONS OFF) # Desactivar extensiones específicas del compilador
 
 # Buscar Boost
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost 1.70 REQUIRED COMPONENTS system)
+if (NOT Boost_FOUND)
+    message(FATAL_ERROR "Boost no encontrado. Instala Boost 1.70 o superior.")
+endif()
 
-# Incluir directorios de encabezados
-include_directories(${Boost_INCLUDE_DIRS} include)
+# Mensajes de depuración
+message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
 
 # Archivos fuente del servidor
 set(SERVER_SOURCES
@@ -31,12 +37,14 @@ set(CLIENT_SOURCES
 
 # Ejecutable del servidor
 add_executable(ayanami_server ${SERVER_SOURCES})
-target_link_libraries(ayanami_server ${Boost_LIBRARIES})
+target_include_directories(ayanami_server PRIVATE ${Boost_INCLUDE_DIRS} include)
+target_link_libraries(ayanami_server PRIVATE ${Boost_LIBRARIES})
 
-# Ejecutable del cliente (enlazando readline además de Boost)
+# Ejecutable del cliente
 add_executable(ayanami_client ${CLIENT_SOURCES})
-target_link_libraries(ayanami_client ${Boost_LIBRARIES} readline)
+target_include_directories(ayanami_client PRIVATE ${Boost_INCLUDE_DIRS} include)
+target_link_libraries(ayanami_client PRIVATE ${Boost_LIBRARIES} readline)
 
-# Mensajes para verificar
-message(STATUS "Servidor: ayanami_server configurado.")
-message(STATUS "Cliente: ayanami_client configurado con readline.")
+# Mensajes para verificar configuración
+message(STATUS "Servidor configurado: ayanami_server.")
+message(STATUS "Cliente configurado: ayanami_client con readline.")

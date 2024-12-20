@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include "server/handler.hpp"
+#include "master/handler.hpp"
 #include "utils/strings.hpp"
 
 using boost::asio::ip::tcp;

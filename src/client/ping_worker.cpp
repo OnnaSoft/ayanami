@@ -1,9 +1,9 @@
-#include "ping_worker.hpp"
+#include "client/ping_worker.hpp"
 #include <iostream>
 #include <chrono>
 #include <thread>
 #include <boost/asio/write.hpp>
-#include "protocol.hpp"
+#include "utils/protocol.hpp"
 
 PingWorker::PingWorker(boost::asio::ip::tcp::socket& socket, boost::asio::io_context& io_context, SessionManager& manager)
     : socket_(socket), io_context_(io_context), manager_(manager), stop_flag_(false) {}

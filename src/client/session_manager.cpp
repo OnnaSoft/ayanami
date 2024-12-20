@@ -1,5 +1,5 @@
-#include "session_manager.hpp"
-#include "strings.hpp"
+#include "client/session_manager.hpp"
+#include "utils/strings.hpp"
 #include <iostream>
 
 void SessionManager::register_session(const std::string& id, std::function<void(std::string)> callback) {

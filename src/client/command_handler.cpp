@@ -1,7 +1,7 @@
-#include "command_handler.hpp"
-#include "protocol.hpp"
 #include <iostream>
-#include "strings.hpp"
+#include "client/command_handler.hpp"
+#include "utils/protocol.hpp"
+#include "utils/strings.hpp"
 
 void send_command(const std::string& command, boost::asio::ip::tcp::socket& socket, SessionManager& manager) {
     static int command_counter = 0;

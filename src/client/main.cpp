@@ -8,13 +8,13 @@
 #include <algorithm>
 #include <cctype>
 #include <csignal>
-#include "strings.hpp"
-#include "history.hpp"
-#include "session_manager.hpp"
-#include "ping_worker.hpp"
-#include "receiver.hpp"
-#include "command_handler.hpp"
-#include "protocol.hpp"
+#include "utils/strings.hpp"
+#include "client/history.hpp"
+#include "client/session_manager.hpp"
+#include "client/ping_worker.hpp"
+#include "client/receiver.hpp"
+#include "client/command_handler.hpp"
+#include "utils/protocol.hpp"
 
 using boost::asio::ip::tcp;
 

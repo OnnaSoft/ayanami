@@ -4,7 +4,7 @@
 #include <boost/asio.hpp>
 #include <thread>
 #include <atomic>
-#include "session_manager.hpp"
+#include "client/session_manager.hpp"
 
 class ResponseReceiver {
 public:

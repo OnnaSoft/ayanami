@@ -1,6 +1,6 @@
-#include "receiver.hpp"
-#include "protocol.hpp"
-#include "strings.hpp"
+#include "client/receiver.hpp"
+#include "utils/protocol.hpp"
+#include "utils/strings.hpp"
 #include <iostream>
 
 ResponseReceiver::ResponseReceiver(boost::asio::ip::tcp::socket& socket, SessionManager& manager)

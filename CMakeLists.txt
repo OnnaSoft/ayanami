@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(AyanamiBD)
 
 # Configurar estándar C++
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF) # Desactivar extensiones específicas del compilador
 
@@ -16,9 +16,18 @@ endif()
 message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
 
-# Archivos fuente del servidor
-set(SERVER_SOURCES
-    src/server/main.cpp
+# Archivos fuente del master
+set(MASTER_SOURCES
+    src/master/main.cpp
+    src/master/handler.cpp
+    src/utils/protocol.cpp
+    src/utils/strings.cpp
+)
+
+# Archivos fuente del nodo
+set(NODE_SOURCES
+    src/node/main.cpp
+    src/node/worker.cpp
     src/utils/protocol.cpp
     src/utils/strings.cpp
 )
@@ -35,10 +44,15 @@ set(CLIENT_SOURCES
     src/utils/strings.cpp
 )
 
-# Ejecutable del servidor
-add_executable(ayanami_server ${SERVER_SOURCES})
-target_include_directories(ayanami_server PRIVATE ${Boost_INCLUDE_DIRS} include)
-target_link_libraries(ayanami_server PRIVATE ${Boost_LIBRARIES})
+# Ejecutable del master
+add_executable(ayanami_master ${MASTER_SOURCES})
+target_include_directories(ayanami_master PRIVATE ${Boost_INCLUDE_DIRS} include)
+target_link_libraries(ayanami_master PRIVATE ${Boost_LIBRARIES})
+
+# Ejecutable del nodo
+add_executable(ayanami_node ${NODE_SOURCES})
+target_include_directories(ayanami_node PRIVATE ${Boost_INCLUDE_DIRS} include)
+target_link_libraries(ayanami_node PRIVATE ${Boost_LIBRARIES})
 
 # Ejecutable del cliente
 add_executable(ayanami_client ${CLIENT_SOURCES})
@@ -46,5 +60,6 @@ target_include_directories(ayanami_client PRIVATE ${Boost_INCLUDE_DIRS} include)
 target_link_libraries(ayanami_client PRIVATE ${Boost_LIBRARIES} readline)
 
 # Mensajes para verificar configuración
-message(STATUS "Servidor configurado: ayanami_server.")
+message(STATUS "Servidor configurado: ayanami_master.")
+message(STATUS "Nodo configurado: ayanami_node.")
 message(STATUS "Cliente configurado: ayanami_client con readline.")

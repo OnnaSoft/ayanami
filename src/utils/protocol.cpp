@@ -57,12 +57,12 @@ std::pair<std::string, std::string> parse_message(const std::vector<char>& buffe
 std::pair<std::string, std::string> read_response(tcp::socket& socket) {
     boost::system::error_code error;
 
-    char length_buffer[4];
+    std::string length_buffer(4, '\0');
     boost::asio::read(socket, boost::asio::buffer(length_buffer, 4), error);
     if (error) throw boost::system::system_error(error);
 
     uint32_t response_length;
-    std::memcpy(&response_length, length_buffer, sizeof(response_length));
+    std::memcpy(&response_length, length_buffer.data(), sizeof(response_length));
     response_length = ntohl(response_length);
 
     std::vector<char> response_buffer(response_length);

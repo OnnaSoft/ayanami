@@ -39,23 +39,23 @@ int main() {
 
         const int num_processes = 4; // Número de procesos hijos
         for (int i = 0; i < num_processes; ++i) {
-            pid_t pid = fork();
-            if (pid < 0) {
+            if (pid_t pid = fork(); pid < 0) {
                 std::cerr << "Error al hacer fork()" << std::endl;
                 return 1;
-            } else if (pid == 0) {
-                // Proceso hijo
-                while (true) {
-                    tcp::socket socket(io_context);
-                    acceptor.async_accept(socket, [&](const boost::system::error_code& error) {
-                        if (!error) {
-                            co_spawn(io_context, handle_client(std::move(socket)), boost::asio::detached);
-                        }
-                    });
-                    io_context.run();
-                }
-                return 0;
+            } else if (pid > 0) {
+                continue;
             }
+
+            while (true) {
+                tcp::socket socket(io_context);
+                acceptor.async_accept(socket, [&](const boost::system::error_code& error) {
+                    if (!error) {
+                        co_spawn(io_context, handle_client(std::move(socket)), boost::asio::detached);
+                    }
+                });
+                io_context.run();
+            }
+            return 0;
         }
 
         for (int i = 0; i < num_processes; ++i) {

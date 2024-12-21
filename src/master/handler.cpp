@@ -38,7 +38,6 @@ awaitable<void> handle_client(tcp::socket socket) {
         std::cout << "New connection from " << socket.remote_endpoint() << std::endl;
 
         for (;;) {
-            char length_buffer[4] = {0};
             std::string length_buffer(4, '\0');
             std::size_t bytes_read = co_await boost::asio::async_read(
                 socket, boost::asio::buffer(length_buffer), use_awaitable);
@@ -47,14 +46,14 @@ awaitable<void> handle_client(tcp::socket socket) {
             }
 
             uint32_t message_length = 0;
-            std::memcpy(&message_length, length_buffer, sizeof(message_length));
+            std::memcpy(&message_length, length_buffer.data(), sizeof(message_length));
             message_length = ntohl(message_length);
 
             if (message_length <= FIXED_ID_SIZE + 1) {
                 throw InvalidMessageFormatException("Invalid message length");
             }
 
-            char id_buffer[FIXED_ID_SIZE] = {0};
+            std::string id_buffer(FIXED_ID_SIZE, '\0');
             co_await boost::asio::async_read(socket, boost::asio::buffer(id_buffer), use_awaitable);
 
             char delimiter = 0;

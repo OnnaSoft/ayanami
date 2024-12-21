@@ -6,6 +6,10 @@
 #include <boost/asio/detached.hpp>
 #include "utils/protocol.hpp"
 #include "utils/strings.hpp"
+#include "exceptions/InvalidMessageLengthException.hpp"
+#include "exceptions/InvalidMessageFormatException.hpp"
+#include "exceptions/InvalidDelimiterException.hpp"
+#include "exceptions/InvalidContentLengthException.hpp"
 
 using boost::asio::ip::tcp;
 using boost::asio::awaitable;
@@ -19,10 +23,9 @@ std::string format_fixed_id(const std::string& id) {
                                       : id + std::string(FIXED_ID_SIZE - id.size(), ' ');
 }
 
-std::string process_command(const std::string& id, const std::string& content) {
+std::string process_command(const std::string_view& id, const std::string& content) {
     std::ostringstream response;
-    std::string cleaned_content = trim(clean_null_terminated(content));
-    if (cleaned_content == "PING") {
+    if (std::string cleaned_content = trim(clean_null_terminated(content)); cleaned_content == "PING") {
         response << "PONG";
     } else {
         response << "UNKNOWN COMMAND";
@@ -36,10 +39,11 @@ awaitable<void> handle_client(tcp::socket socket) {
 
         for (;;) {
             char length_buffer[4] = {0};
+            std::string length_buffer(4, '\0');
             std::size_t bytes_read = co_await boost::asio::async_read(
                 socket, boost::asio::buffer(length_buffer), use_awaitable);
             if (bytes_read != sizeof(length_buffer)) {
-                throw std::runtime_error("Incomplete length header");
+                throw InvalidMessageLengthException("Incomplete length header");
             }
 
             uint32_t message_length = 0;
@@ -47,21 +51,20 @@ awaitable<void> handle_client(tcp::socket socket) {
             message_length = ntohl(message_length);
 
             if (message_length <= FIXED_ID_SIZE + 1) {
-                throw std::runtime_error("Invalid message length");
+                throw InvalidMessageFormatException("Invalid message length");
             }
 
             char id_buffer[FIXED_ID_SIZE] = {0};
             co_await boost::asio::async_read(socket, boost::asio::buffer(id_buffer), use_awaitable);
 
             char delimiter = 0;
-            co_await boost::asio::async_read(socket, boost::asio::buffer(&delimiter, 1), use_awaitable);
             if (delimiter != ':') {
-                throw std::runtime_error("Invalid message format: Missing ':' delimiter");
+                throw InvalidDelimiterException("Invalid message format: Missing ':' delimiter");
             }
 
             uint32_t content_length = message_length - FIXED_ID_SIZE - 1;
             if (content_length == 0) {
-                throw std::runtime_error("Invalid content length");
+                throw InvalidContentLengthException("Invalid content length");
             }
 
             std::vector<char> content_buffer(content_length);
@@ -75,10 +78,16 @@ awaitable<void> handle_client(tcp::socket socket) {
 
             co_await boost::asio::async_write(socket, boost::asio::buffer(message), use_awaitable);
         }
+    } catch (const InvalidMessageLengthException& e) {
+        std::cerr << "Invalid message length: " << e.what() << std::endl;
+    } catch (const InvalidMessageFormatException& e) {
+        std::cerr << "Invalid message format: " << e.what() << std::endl;
+    } catch (const InvalidDelimiterException& e) {
+        std::cerr << "Invalid delimiter: " << e.what() << std::endl;
+    } catch (const InvalidContentLengthException& e) {
+        std::cerr << "Invalid content length: " << e.what() << std::endl;
     } catch (const std::exception& e) {
-        std::cerr << "Error handling client: " << e.what() << std::endl;
-    } catch (...) {
-        std::cerr << "Unknown error occurred while handling client" << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
     }
     co_return;
 }

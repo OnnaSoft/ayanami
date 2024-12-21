@@ -1,11 +1,13 @@
 #include "utils/protocol.hpp"
 #include <iostream>
+#include <stdexcept>
 #include <thread>
 #include <chrono>
+#include "exceptions/IncompleteMessageException.hpp"
 
 using boost::asio::ip::tcp;
 
-bool reconnect(tcp::socket& socket, boost::asio::io_context& io_context) {
+bool reconnect(tcp::socket& socket, [[maybe_unused]] const boost::asio::io_context& io_context) {
     constexpr int RECONNECT_ATTEMPTS = 5;
 
     for (int attempt = 1; attempt <= RECONNECT_ATTEMPTS; ++attempt) {
@@ -14,17 +16,17 @@ bool reconnect(tcp::socket& socket, boost::asio::io_context& io_context) {
             socket.connect(tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 8081));
             std::cout << "Conexión exitosa." << std::endl;
             return true;
-        } catch (const std::exception& e) {
+        } catch (const boost::system::system_error& e) {
             std::cerr << "Error al conectar: " << e.what() << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1)); // Esperar antes de reintentar
         }
     }
-    return false; // Si falla después de varios intentos
+    return false;
 }
 
 // Construir el mensaje en el formato length:id:content
 std::vector<char> build_message(const std::string& id, const std::string& content) {
-    uint32_t length = 4 + id.size() + 1 + content.size();
+    uint32_t length = 4 + static_cast<uint32_t>(id.size()) + 1 + static_cast<uint32_t>(content.size());
     uint32_t network_length = htonl(length);
 
     std::vector<char> buffer(length + 4);
@@ -39,6 +41,7 @@ std::vector<char> build_message(const std::string& id, const std::string& conten
 // Parsear un mensaje en formato length:id:content
 std::pair<std::string, std::string> parse_message(const std::vector<char>& buffer) {
     if (buffer.size() < 4) throw std::runtime_error("Mensaje incompleto");
+    if (buffer.size() < 4) throw IncompleteMessageException("Mensaje incompleto");
 
     uint32_t network_length;
     std::memcpy(&network_length, buffer.data(), 4);

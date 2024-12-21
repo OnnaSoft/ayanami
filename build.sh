@@ -4,3 +4,4 @@ cd build
 cmake ..
 make
 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+cp compile_commands.json ../

@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include "master/handler.hpp"
 #include "utils/strings.hpp"
+#include "exceptions/SocketConfigurationException.hpp"
 
 using boost::asio::ip::tcp;
 using boost::asio::awaitable;
@@ -30,9 +31,8 @@ int main() {
 
         // Habilitar SO_REUSEPORT
         int native_socket = acceptor.native_handle();
-        int opt = 1;
-        if (setsockopt(native_socket, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) < 0) {
-            throw std::runtime_error("Error al configurar SO_REUSEPORT");
+        if (int opt = 1; setsockopt(native_socket, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) < 0) {
+            throw SocketConfigurationException("Error while setting SO_REUSEPORT");
         }
 
         std::cout << "Server listening on " << host << ":" << port << std::endl;

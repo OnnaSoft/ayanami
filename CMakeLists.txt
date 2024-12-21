@@ -19,6 +19,7 @@ message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
 # Archivos fuente del master
 set(MASTER_SOURCES
     src/master/main.cpp
+    src/master/config.cpp
     src/master/handler.cpp
     src/utils/protocol.cpp
     src/utils/strings.cpp

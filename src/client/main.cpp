@@ -18,9 +18,6 @@
 
 using boost::asio::ip::tcp;
 
-std::atomic<bool> running = true;
-
-// Función para reconectar automáticamente
 bool ensure_connection(tcp::socket& socket, boost::asio::io_context& io_context) {
     if (!socket.is_open()) {
         std::cerr << "Conexión perdida. Intentando reconexión..." << std::endl;
@@ -35,6 +32,8 @@ bool ensure_connection(tcp::socket& socket, boost::asio::io_context& io_context)
 
 int main() {
     try {
+        std::atomic<bool> running = true;
+
         boost::asio::io_context io_context{};
         tcp::socket socket(io_context);
         SessionManager session_manager{};
@@ -54,19 +53,18 @@ int main() {
         PingWorker ping_worker(socket, io_context, session_manager);
         ping_worker.start();
 
-        char* input;
+        const char* input;
         while (running) {
-            input = readline("Ayanami> ");  // Leer la entrada del usuario
+            input = readline("Ayanami> ");
             if (!input || std::string(input) == "EXIT") {
                 running = false;
                 break;
             }
 
             std::string command(input);
-            free(input);
 
             if (!command.empty()) {
-                add_history(command.c_str());  // Agregar al historial
+                add_history(command.c_str());
 
                 if (command == "HELP") {
                     std::cout << "Comandos disponibles:\n";
@@ -80,7 +78,7 @@ int main() {
 
                 if (!ensure_connection(socket, io_context)) {
                     running = false;
-                    break;
+                    continue;
                 }
 
                 if (!command.empty()) {
@@ -91,12 +89,9 @@ int main() {
 
         std::cout << "Saliendo..." << std::endl;
 
-        // Guardar historial al salir
         save_history_to_file(history_file);
 
         std::cout << "Guardando historial..." << std::endl;
-
-        // Apagar hilos
         running = false;
 
         std::cout << "Deteniendo hilos..." << std::endl;

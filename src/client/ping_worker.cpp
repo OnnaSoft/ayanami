@@ -28,9 +28,10 @@ void PingWorker::run() {
     try {
         while (!stop_flag_) {
             std::this_thread::sleep_for(std::chrono::seconds(30));
-            std::string id = "PING" + std::to_string(ping_counter++);
+            std::string id;
+            id = std::format("PING{}", ping_counter++);
 
-            manager_.register_session(id, [](const std::string& response) {
+            manager_.register_session(id, [](std::string_view response) {
                 if (response == "PONG") {
                     std::cout << "PING exitoso." << std::endl;
                 }

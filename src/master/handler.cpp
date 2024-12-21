@@ -6,10 +6,10 @@
 #include <boost/asio/detached.hpp>
 #include "utils/protocol.hpp"
 #include "utils/strings.hpp"
-#include "exceptions/InvalidMessageLengthException.hpp"
-#include "exceptions/InvalidMessageFormatException.hpp"
-#include "exceptions/InvalidDelimiterException.hpp"
-#include "exceptions/InvalidContentLengthException.hpp"
+#include "exceptions/invalid_message_length_exception.hpp"
+#include "exceptions/invalid_message_format_exception.hpp"
+#include "exceptions/invalid_delimiter_exception.hpp"
+#include "exceptions/invalid_content_length_exception.hpp"
 
 using boost::asio::ip::tcp;
 using boost::asio::awaitable;
@@ -23,9 +23,9 @@ std::string format_fixed_id(const std::string& id) {
                                       : id + std::string(FIXED_ID_SIZE - id.size(), ' ');
 }
 
-std::string process_command(const std::string_view& id, const std::string& content) {
+std::string process_command(const std::string_view& id, const std::string_view& content) {
     std::ostringstream response;
-    if (std::string cleaned_content = trim(clean_null_terminated(content)); cleaned_content == "PING") {
+    if (auto cleaned_content = trim(clean_null_terminated(content)); cleaned_content == "PING") {
         response << "PONG";
     } else {
         response << "UNKNOWN COMMAND";

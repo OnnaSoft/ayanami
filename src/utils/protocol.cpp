@@ -1,7 +1,7 @@
 #include "utils/protocol.hpp"
-#include "exceptions/IncompleteMessageException.hpp"
-#include "exceptions/InvalidMessageLengthException.hpp"
-#include "exceptions/InvalidMessageFormatException.hpp"
+#include "exceptions/incomplete_message_exception.hpp"
+#include "exceptions/invalid_message_length_exception.hpp"
+#include "exceptions/invalid_message_format_exception.hpp"
 #include <iostream>
 #include <stdexcept>
 #include <thread>

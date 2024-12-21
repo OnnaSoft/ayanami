@@ -1,6 +1,5 @@
 #include "iostream"
 
-// Función para limpiar espacios en blanco del inicio y final de una cadena
 std::string trim(const std::string_view& str) {
     auto start = str.begin();
     while (start != str.end() && std::isspace(*start)) start++;
@@ -11,9 +10,9 @@ std::string trim(const std::string_view& str) {
     return std::string(start, end + 1);
 }
 
-std::string clean_null_terminated(const std::string& input) {
+std::string clean_null_terminated(const std::string_view& input) {
     if (size_t pos = input.find('\0'); pos != std::string::npos) {
-        return input.substr(0, pos);
+        return std::string(input.substr(0, pos));
     }
-    return input;
+    return std::string(input);
 }

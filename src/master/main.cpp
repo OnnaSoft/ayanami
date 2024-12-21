@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include "master/handler.hpp"
 #include "utils/strings.hpp"
-#include "exceptions/SocketConfigurationException.hpp"
+#include "exceptions/socket_configuration_exception.hpp"
 
 using boost::asio::ip::tcp;
 using boost::asio::awaitable;

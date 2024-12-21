@@ -15,10 +15,11 @@
 #include "client/receiver.hpp"
 #include "client/command_handler.hpp"
 #include "utils/protocol.hpp"
+#include "client/config.hpp"
 
 using boost::asio::ip::tcp;
 
-bool ensure_connection(tcp::socket& socket, boost::asio::io_context& io_context) {
+bool ensure_connection(tcp::socket& socket, const boost::asio::io_context& io_context) {
     if (!socket.is_open()) {
         std::cerr << "Conexión perdida. Intentando reconexión..." << std::endl;
         if (!reconnect(socket, io_context)) {

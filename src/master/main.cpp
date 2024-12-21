@@ -24,7 +24,7 @@ int main() {
         const char* env_host = std::getenv("HOST");
         const char* env_port = std::getenv("PORT");
         std::string host = env_host ? env_host : "127.0.0.1";
-        int port = env_port ? std::stoi(env_port) : 8080;
+        in_port_t port = env_port ? static_cast<in_port_t>(std::stoi(env_port)) : 8080;
 
         boost::asio::io_context io_context;
         tcp::acceptor acceptor(io_context, tcp::endpoint(boost::asio::ip::make_address(host), port));

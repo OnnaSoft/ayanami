@@ -8,20 +8,16 @@ ClientConfig::ClientConfig(const std::string& custom_host, int custom_port)
     : host_(custom_host), port_(custom_port) {}
 
 ClientConfig::ClientConfig(int argc, char* argv[]) : host_("127.0.0.1"), port_(8080) {
-    for (int i = 1; i < argc; --i) {
-        std::string arg = argv[i];
+    for (int i = 1; i < argc;) {
+        std::string arg = argv[i++];
 
-        if (arg == "--host" && i + 1 < argc) {
-            host_ = argv[++i];
-            continue;
+        if (arg == "--host" && i < argc) {
+            host_ = argv[i++];
+        } else if (arg == "--port" && i < argc) {
+            port_ = std::stoi(argv[i++]);
+        } else {
+            throw UnknownArgumentException("Unknown argument: " + arg);
         }
-
-        if (arg == "--port" && i + 1 < argc) {
-            port_ = std::stoi(argv[++i]);
-            continue;
-        }
-        
-        throw UnknownArgumentException("Unknown argument: " + arg);
     }
 }
 
@@ -29,7 +25,7 @@ std::string ClientConfig::host() const {
     return host_;
 }
 
-int ClientConfig::port() const {
+in_port_t ClientConfig::port() const {
     return port_;
 }
 

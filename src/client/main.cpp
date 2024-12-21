@@ -21,30 +21,34 @@ using boost::asio::ip::tcp;
 
 bool ensure_connection(tcp::socket& socket, const boost::asio::io_context& io_context) {
     if (!socket.is_open()) {
-        std::cerr << "Conexión perdida. Intentando reconexión..." << std::endl;
+        std::cerr << "Connection lost. Attempting reconnection..." << std::endl;
         if (!reconnect(socket, io_context)) {
-            std::cerr << "No se pudo reconectar al servidor." << std::endl;
+            std::cerr << "Failed to reconnect to the server." << std::endl;
             return false;
         }
-        std::cout << "Reconexion exitosa." << std::endl;
+        std::cout << "Reconnection successful." << std::endl;
     }
     return true;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     try {
+        ClientConfig config(argc, argv);
+        std::cout << "Using configuration: Host=" << config.host() << ", Port=" << config.port() << std::endl;
+
         std::atomic<bool> running = true;
 
         boost::asio::io_context io_context{};
         tcp::socket socket(io_context);
+        tcp::endpoint endpoint(boost::asio::ip::make_address(config.host()), config.port());
+
         SessionManager session_manager{};
 
         std::string history_file = get_history_file_path();
 
-        if (!reconnect(socket, io_context)) {
-            std::cerr << "No se pudo conectar al servidor." << std::endl;
-            return 1;
-        }
+        std::cout << "Connecting to the server..." << std::endl;
+        socket.connect(endpoint);
+        std::cout << "Connected to the server." << std::endl;
 
         load_history_from_file(history_file);
 
@@ -68,10 +72,10 @@ int main() {
                 add_history(command.c_str());
 
                 if (command == "HELP") {
-                    std::cout << "Comandos disponibles:\n";
-                    std::cout << "  PING       - Verificar conexión al servidor\n";
-                    std::cout << "  EXIT       - Salir del programa\n";
-                    std::cout << "  HELP       - Mostrar esta ayuda\n";
+                    std::cout << "Available commands:\n";
+                    std::cout << "  PING       - Check server connection\n";
+                    std::cout << "  EXIT       - Exit the program\n";
+                    std::cout << "  HELP       - Show this help message\n";
                     continue;
                 }
 
@@ -88,23 +92,24 @@ int main() {
             }
         }
 
-        std::cout << "Saliendo..." << std::endl;
+        std::cout << "Exiting..." << std::endl;
 
         save_history_to_file(history_file);
 
-        std::cout << "Guardando historial..." << std::endl;
+        std::cout << "Saving history..." << std::endl;
         running = false;
 
-        std::cout << "Deteniendo hilos..." << std::endl;
+        std::cout << "Stopping threads..." << std::endl;
 
         receiver.stop();
         ping_worker.stop();
 
-        std::cout << "Hilos detenidos." << std::endl;
+        std::cout << "Threads stopped." << std::endl;
         socket.close();
-        std::cout << "Desconectando del servidor." << std::endl;
+        std::cout << "Disconnected from the server." << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
     }
 
     return 0;

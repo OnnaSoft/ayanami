@@ -3,11 +3,12 @@
 
 #include <string>
 #include <iostream>
+#include <netinet/in.h>
 
 class ClientConfig {
 private:
     std::string host_;
-    int port_;
+    in_port_t port_;
 
 public:
     // Constructor with defaults
@@ -21,7 +22,7 @@ public:
 
     // Getters
     std::string host() const;
-    int port() const;
+    in_port_t port() const;
 
     // Print the configuration for debugging
     void print_config() const;

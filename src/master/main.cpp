@@ -27,7 +27,8 @@ awaitable<void> accept_clients(tcp::acceptor &acceptor, boost::asio::io_context&
         {
             tcp::socket socket = co_await acceptor.async_accept(use_awaitable);
             Transport transport(std::move(socket), io_context);
-            //co_spawn(io_context, handle_client(transport), boost::asio::detached);
+            
+            co_spawn(io_context, handle_client(transport), boost::asio::detached);
         }
         catch (const std::exception &e)
         {

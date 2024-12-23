@@ -2,19 +2,21 @@
 #define PING_WORKER_HPP
 
 #include <boost/asio.hpp>
+#include <atomic>
 #include "exceptions/ping_worker_exception.hpp"
 #include "client/session_manager.hpp"
+#include "utils/transport.hpp"
 
 class PingWorker {
 public:
-    PingWorker(boost::asio::ip::tcp::socket& socket, boost::asio::io_context& io_context, SessionManager& manager);
+    PingWorker(Transport& transport, boost::asio::io_context& io_context, SessionManager& manager);
     ~PingWorker();
 
     void start();
     void stop();
 
 private:
-    boost::asio::ip::tcp::socket& socket_;
+    Transport& transport_;
     boost::asio::io_context& io_context_;
     SessionManager& manager_;
     std::atomic<bool> stop_flag_;

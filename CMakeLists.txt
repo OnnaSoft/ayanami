@@ -1,31 +1,27 @@
 cmake_minimum_required(VERSION 3.15)
 project(AyanamiBD)
 
-# Configurar estándar C++
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_EXTENSIONS OFF) # Desactivar extensiones específicas del compilador
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Buscar Boost
 find_package(Boost 1.70 REQUIRED COMPONENTS system)
 if (NOT Boost_FOUND)
     message(FATAL_ERROR "Boost no encontrado. Instala Boost 1.70 o superior.")
 endif()
 
-# Mensajes de depuración
-message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
-message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
+include_directories(${Boost_INCLUDE_DIRS})
+set(BOOST_LIBS ${Boost_LIBRARIES})
 
-# Archivos fuente del master
 set(MASTER_SOURCES
     src/master/main.cpp
     src/master/config.cpp
     src/master/handler.cpp
     src/utils/protocol.cpp
+    src/utils/transport.cpp
     src/utils/strings.cpp
 )
 
-# Archivos fuente del nodo
 set(NODE_SOURCES
     src/node/main.cpp
     src/node/worker.cpp
@@ -33,9 +29,9 @@ set(NODE_SOURCES
     src/utils/strings.cpp
 )
 
-# Archivos fuente del cliente
 set(CLIENT_SOURCES
     src/client/main.cpp
+    src/client/config.cpp
     src/client/command_handler.cpp
     src/client/ping_worker.cpp
     src/client/receiver.cpp
@@ -43,24 +39,15 @@ set(CLIENT_SOURCES
     src/client/history.cpp
     src/utils/protocol.cpp
     src/utils/strings.cpp
+    src/utils/transport.cpp
 )
 
-# Ejecutable del master
-add_executable(ayanami_master ${MASTER_SOURCES})
-target_include_directories(ayanami_master PRIVATE ${Boost_INCLUDE_DIRS} include)
-target_link_libraries(ayanami_master PRIVATE ${Boost_LIBRARIES})
+macro(add_ayanami_executable target sources)
+    add_executable(${target} ${sources})
+    target_include_directories(${target} PRIVATE ${Boost_INCLUDE_DIRS} include)
+    target_link_libraries(${target} PRIVATE ${BOOST_LIBS} readline)
+endmacro()
 
-# Ejecutable del nodo
-add_executable(ayanami_node ${NODE_SOURCES})
-target_include_directories(ayanami_node PRIVATE ${Boost_INCLUDE_DIRS} include)
-target_link_libraries(ayanami_node PRIVATE ${Boost_LIBRARIES})
-
-# Ejecutable del cliente
-add_executable(ayanami_client ${CLIENT_SOURCES})
-target_include_directories(ayanami_client PRIVATE ${Boost_INCLUDE_DIRS} include)
-target_link_libraries(ayanami_client PRIVATE ${Boost_LIBRARIES} readline)
-
-# Mensajes para verificar configuración
-message(STATUS "Servidor configurado: ayanami_master.")
-message(STATUS "Nodo configurado: ayanami_node.")
-message(STATUS "Cliente configurado: ayanami_client con readline.")
+add_ayanami_executable(ayanami_master "${MASTER_SOURCES}")
+add_ayanami_executable(ayanami_node "${NODE_SOURCES}")
+add_ayanami_executable(ayanami_client "${CLIENT_SOURCES}")

@@ -1,31 +1,27 @@
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#ifndef CLIENT_CONFIG_HPP
+#define CLIENT_CONFIG_HPP
 
 #include <string>
-#include <iostream>
+#include <cstdint>
+#include <stdexcept>
 #include <netinet/in.h>
 
 class ClientConfig {
+public:
+    ClientConfig();
+    ClientConfig(const std::string& custom_host, in_port_t custom_port);
+    ClientConfig(int argc, char* argv[]); 
+
+    std::string host() const noexcept; 
+    in_port_t port() const noexcept;   
+
+    void print_config() const;
+
 private:
     std::string host_;
     in_port_t port_;
 
-public:
-    // Constructor with defaults
-    ClientConfig();
-
-    // Constructor to initialize with custom host and port
-    ClientConfig(const std::string& custom_host, int custom_port);
-
-    // Constructor to initialize from command-line arguments
-    ClientConfig(int argc, char* argv[]);
-
-    // Getters
-    std::string host() const;
-    in_port_t port() const;
-
-    // Print the configuration for debugging
-    void print_config() const;
+    void validate_port() const;  // Valida que el puerto esté en un rango válido
 };
 
 #endif // CLIENT_CONFIG_HPP

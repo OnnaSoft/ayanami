@@ -27,17 +27,29 @@ bool reconnect(tcp::socket& socket, [[maybe_unused]] const boost::asio::io_conte
 }
 
 std::vector<char> build_message(const std::string& id, const std::string& content) {
-    uint32_t length = 4 + static_cast<uint32_t>(id.size()) + 1 + static_cast<uint32_t>(content.size());
+    constexpr size_t fixed_id_length = 8;
+
+    if (id.size() > fixed_id_length) {
+        throw std::invalid_argument("ID must be 8 characters or less.");
+    }
+
+    uint32_t length = 4 + fixed_id_length + 1 + static_cast<uint32_t>(content.size());
     uint32_t network_length = htonl(length);
 
     std::vector<char> buffer(length + 4);
+
     std::memcpy(buffer.data(), &network_length, 4);
     std::memcpy(buffer.data() + 4, id.c_str(), id.size());
-    buffer[12] = ':';
-    std::memcpy(buffer.data() + 13, content.c_str(), content.size());
+    if (id.size() < fixed_id_length) {
+        std::memset(buffer.data() + 4 + id.size(), '\0', fixed_id_length - id.size());
+    }
+
+    buffer[4 + fixed_id_length] = ':';
+    std::memcpy(buffer.data() + 5 + fixed_id_length, content.c_str(), content.size());
 
     return buffer;
 }
+
 
 std::pair<std::string, std::string> parse_message(const std::vector<char>& buffer) {
     if (buffer.size() < 4) throw IncompleteMessageException("Header is incomplete.");

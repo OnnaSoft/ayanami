@@ -4,10 +4,11 @@
 #include <boost/asio/detached.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/use_awaitable.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include "utils/protocol.hpp"
 
-PingWorker::PingWorker(boost::asio::ip::tcp::socket& socket, boost::asio::io_context& io_context, SessionManager& manager)
-    : socket_(socket), io_context_(io_context), manager_(manager), stop_flag_(false) {}
+PingWorker::PingWorker(Transport& transport, boost::asio::io_context& io_context, SessionManager& manager)
+    : transport_(transport), io_context_(io_context), manager_(manager), stop_flag_(false) {}
 
 PingWorker::~PingWorker() {
     try {
@@ -31,7 +32,7 @@ void PingWorker::start() {
 
 void PingWorker::stop() {
     stop_flag_ = true;
-    socket_.close(); // Close the socket to cancel ongoing operations
+    transport_.close();
 }
 
 boost::asio::awaitable<void> PingWorker::run() {
@@ -52,8 +53,7 @@ boost::asio::awaitable<void> PingWorker::run() {
                 }
             });
 
-            auto message = build_message(id, "PING");
-            co_await boost::asio::async_write(socket_, boost::asio::buffer(message), boost::asio::use_awaitable);
+            co_await transport_.send(id, "PING");
         }
     } catch (const std::exception& e) {
         std::cerr << "Error in ping_worker: " << e.what() << std::endl;

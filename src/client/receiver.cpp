@@ -1,4 +1,5 @@
 #include "client/receiver.hpp"
+#include "utils/transport.hpp"
 #include <iostream>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
@@ -8,8 +9,8 @@ using boost::asio::awaitable;
 using boost::asio::use_awaitable;
 using boost::asio::co_spawn;
 
-ResponseReceiver::ResponseReceiver(boost::asio::ip::tcp::socket& socket, SessionManager& manager)
-    : socket_(socket), manager_(manager), stop_flag_(false) {}
+ResponseReceiver::ResponseReceiver(Transport& transport, SessionManager& manager)
+    : transport_(transport), manager_(manager), stop_flag_(false) {}
 
 ResponseReceiver::~ResponseReceiver() {
     try {
@@ -21,7 +22,7 @@ ResponseReceiver::~ResponseReceiver() {
 
 void ResponseReceiver::start() {
     co_spawn(
-        socket_.get_executor(),
+        transport_.socket().get_executor(),
         [this]() -> awaitable<void> {
             co_await run();
         },
@@ -31,13 +32,13 @@ void ResponseReceiver::start() {
 
 void ResponseReceiver::stop() {
     stop_flag_ = true;
-    socket_.close();
+    transport_.close();
 }
 
 awaitable<void> ResponseReceiver::run() {
     try {
         while (!stop_flag_) {
-            auto [response_id, response_content] = read_response(socket_);
+            auto [response_id, response_content] = read_response(transport_.socket());
             auto id_clean = trim(clean_null_terminated(response_id));
             manager_.dispatch_response(id_clean, response_content);
         }

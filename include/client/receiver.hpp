@@ -2,20 +2,22 @@
 #define RESPONSE_RECEIVER_HPP
 
 #include <boost/asio.hpp>
+#include <atomic>
 #include "utils/protocol.hpp"
 #include "utils/strings.hpp"
 #include "client/session_manager.hpp"
+#include "utils/transport.hpp"
 
 class ResponseReceiver {
 public:
-    ResponseReceiver(boost::asio::ip::tcp::socket& socket, SessionManager& manager);
+    ResponseReceiver(Transport& transport, SessionManager& manager);
     ~ResponseReceiver();
 
     void start();
     void stop();
 
 private:
-    boost::asio::ip::tcp::socket& socket_;
+    Transport& transport_;
     SessionManager& manager_;
     std::atomic<bool> stop_flag_;
 

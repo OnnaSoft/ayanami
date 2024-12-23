@@ -2,6 +2,7 @@
 #define STRINGS_HPP
 
 #include "iostream"
+#include <string_view>
 
 std::string trim(const std::string_view& str);
 
